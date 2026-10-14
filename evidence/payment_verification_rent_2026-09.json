@@ -1,0 +1,80 @@
+{
+  "report": "Rent payment verification (simulated local ledger only; no real bank transfer)",
+  "authorization": "Explicit human approval in chat for one September 2026 rent payment, lease 1, $2,400.00",
+  "payment": {
+    "payment_id": 1,
+    "kind": "rent",
+    "ref_id": 1202609,
+    "payee": "Elm City Properties",
+    "lease_id": 1,
+    "billing_period": "2026-09",
+    "amount": 2400.0,
+    "account": "checking",
+    "paid_at": "2026-08-31 (business date)",
+    "approved_by": "Authorized course operator",
+    "approval_id": "8d79797d4b91"
+  },
+  "balances": {
+    "before": 3400.0,
+    "after": 1000.0,
+    "cash_accounts_row": [
+      "checking",
+      1000.0,
+      "2026-08-31"
+    ],
+    "get_cash": {
+      "account": "checking",
+      "balance": 1000.0,
+      "as_of": "2026-08-31"
+    }
+  },
+  "audit": {
+    "records_before": 239,
+    "records_after": 241,
+    "new_record_ids": [
+      {
+        "audit_id": "7b57f208fd1c",
+        "event": "payment_attempt",
+        "timestamp_utc": "2026-10-14T04:24:25.745+00:00",
+        "run_id": "human-8d79797d4b91"
+      },
+      {
+        "audit_id": "0c75ad7679ee",
+        "event": "payment_committed",
+        "timestamp_utc": "2026-10-14T04:24:26.167+00:00",
+        "run_id": "human-8d79797d4b91"
+      }
+    ],
+    "committed_payment_records_in_trail": 1
+  },
+  "checks": {
+    "exactly one payment row": true,
+    "it is the authorized rent payment": true,
+    "checking balance exactly 1000.00": true,
+    "GET /cash agrees with cash_accounts": true,
+    "invoice 501 open and unpaid": true,
+    "no invoice payment row": true,
+    "ticket 103 no purchase/discount approval (no payment ref to it; hoodie stock/pricing unchanged)": true,
+    "all three tickets workflow resolved": true,
+    "rent recorded paid for 2026-09 (preview: already_paid, existing payment 1)": true,
+    "ticket 102 business state = paid": true,
+    "ticket 101 still awaiting decision (invoice unpaid)": true,
+    "lease next_due unchanged (no automatic advance)": true,
+    "preview now blocks a second payment": true,
+    "audit: only 2 new records (attempt + committed)": true,
+    "audit: exactly one committed payment in the whole trail": true,
+    "audit: earlier 239 records intact": true,
+    "audit: committed record matches the payment": true
+  },
+  "all_checks_passed": true,
+  "backups_before_payment": [
+    "campus_customs_new.pre-rent-payment.db",
+    "audit_trail.pre-rent-payment.json"
+  ],
+  "notes": [
+    "Invoice 501 remains open and unpaid.",
+    "Lease next_due was not advanced (no business rule defines it).",
+    "Ticket 102 workflow status is unchanged (already resolved); its business state is now paid.",
+    "The admin token is not recorded in this report."
+  ]
+}

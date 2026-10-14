@@ -1,0 +1,24 @@
+{
+  "ticketId": 102,
+  "capturedAt": "2026-10-14T04:15:52.720Z",
+  "url": "http://localhost:5173",
+  "viewport": "1440x1000 full page",
+  "dom": {
+    "ticketState": "resolved",
+    "stampShown": true,
+    "chips": [
+      "✓Workflow resolved",
+      "!Needs a human decision"
+    ],
+    "events": 31,
+    "cash": "3400",
+    "agentPhases": {
+      "agent-boss": "done",
+      "agent-inventory": "idle",
+      "agent-accounting": "done",
+      "agent-facilities": "done",
+      "agent-customer_service": "idle"
+    },
+    "title": "Campus Customs Operations Desk"
+  }
+}

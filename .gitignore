@@ -1,0 +1,30 @@
+# --- secrets and credentials: never commit a real .env (the template .env.example IS committed) ---
+.env
+.env.*
+!.env.example
+*.token
+live.env
+uitest.env
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# --- local tooling and temporary files ---
+.claude/
+.DS_Store
+.validate_*
+*.log
+*.tmp
+
+# --- redundant local database backups (the two required databases in data/ ARE committed) ---
+evidence/*.db

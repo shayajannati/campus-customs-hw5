@@ -1,0 +1,580 @@
+{
+  "schema_version": "1.0",
+  "problem": "MGT 409 Homework 5, Problem 9: Resolve the Tickets",
+  "business_date": "2026-08-31",
+  "definitions": {
+    "final_status": "tickets.status in the working database after a genuine live agent run finished normally ('resolved').",
+    "workflow_resolved": "The agent workflow finished. It does NOT mean the business issue is solved or that anything was paid.",
+    "business_state": "Derived from current records: paid | awaiting_human_decision | no_payment_applicable."
+  },
+  "sources": [
+    "data/campus_customs_new.db (read-only)",
+    "output/audit_trail.json",
+    "evidence/ticket101_run.json",
+    "evidence/ticket102_run.json",
+    "evidence/ticket103_run.json",
+    "evidence/payment_verification_rent_2026-09.json"
+  ],
+  "cash_reconciliation": {
+    "starting_balance": 3400.0,
+    "ticket_changes": {
+      "101": 0.0,
+      "102": -2400.0,
+      "103": 0.0
+    },
+    "ending_balance": 1000.0,
+    "cash_accounts_checking": 1000.0,
+    "payments_rows": 1,
+    "unpaid_invoice_501": {
+      "amount": 840.0,
+      "status": "open"
+    },
+    "arithmetic": "3400.00 + 0.00 - 2400.00 + 0.00 = 1000.00"
+  },
+  "audit": {
+    "records": 241,
+    "original_records": 107,
+    "reset_records": 2,
+    "run_records": {
+      "101": 47,
+      "102": 36,
+      "103": 47
+    },
+    "payment_records": 2,
+    "reset_audit_ids": [
+      "a6e7520d3ac9",
+      "410c049266b9"
+    ],
+    "payment_audit_ids": {
+      "payment_attempt": "7b57f208fd1c",
+      "payment_committed": "0c75ad7679ee"
+    }
+  },
+  "tickets": [
+    {
+      "ticket_id": 101,
+      "subject": "Bulldog tee",
+      "type": "customer_order",
+      "final_status": "resolved",
+      "workflow_resolved": true,
+      "business_state": "awaiting_human_decision",
+      "outcome": "Workflow resolved. Size S is out of stock and invoice 501 ($840.00) remains open; no shipment, restock or payment was approved. No cash movement.",
+      "boss_recommendation": {
+        "status": "needs_human_approval",
+        "summary": "The customer requests 1 Bulldog tee in size S, but none are on hand. The linked $840 reprint invoice is open and 3 days past due as of 2026-08-31; no payments are recorded, though the records do not establish whether payment occurred outside the system. Accounting reports $3,400 cash and $2,400 rent due 2026-09-02; paying both listed obligations would leave $160. Do not promise restock or delivery. A human should decide whether to pay the invoice and whether to authorize any reprint/restock or fulfillment commitment.",
+        "escalations": [
+          {
+            "category": "payment",
+            "decision_needed": "Whether to pay invoice 501 and how to handle it alongside rent due 2026-09-02."
+          },
+          {
+            "category": "stock_commitment",
+            "decision_needed": "Whether to authorize a reprint/restock plan for size S."
+          },
+          {
+            "category": "customer_promise",
+            "decision_needed": "Whether to make any fulfillment or delivery commitment to the customer."
+          }
+        ]
+      },
+      "outstanding_business_decisions": [
+        "Size S of the Classic Bulldog Tee is out of stock (0 on hand, 1 requested).",
+        "Vendor invoice 501 ($840.00 to Bulldog Print Co) is still open and unpaid, 3 days past due at the business date.",
+        "No restock, reprint authorization or customer fulfillment commitment was approved.",
+        "Paying invoice 501 would not by itself put a tee on the shelf; the vendor's reprint lead time is 5 days."
+      ],
+      "run": {
+        "run_id": "ca7516af05d8",
+        "run_mode": "live",
+        "model": "gpt-6-luna",
+        "status": "finished",
+        "requests": 11,
+        "tool_calls": 13,
+        "input_tokens": 27984,
+        "output_tokens": 3260,
+        "audit_records": 47
+      },
+      "agents": [
+        {
+          "agent": "boss",
+          "delegated_by": null,
+          "delegates_to": [
+            "inventory",
+            "accounting",
+            "customer_service"
+          ],
+          "tools_used": {
+            "get_ticket_context": 1,
+            "get_business_date": 1
+          },
+          "contribution": "The customer requests 1 Bulldog tee in size S, but none are on hand. The linked $840 reprint invoice is open and 3 days past due as of 2026-08-31; no payments are recorded, though the records do not establish whether payment occurred outside the system. Accounting reports $3,400 cash and $2,400 rent due 2026-09-02; paying both listed obligations would leave $160. Do not promise restock or delivery. A human should decide whether to pay the invoice and whether to authorize any reprint/restock or fulfillment commitment."
+        },
+        {
+          "agent": "inventory",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_ticket_context": 1
+          },
+          "contribution": "CC-TEE-WHITE size S cannot be filled from current stock: 0 on hand for the requested quantity of 1 (shortfall 1). The linked ticket context shows a rush reprint invoice, but does not establish that replenishment has arrived or when it will be available."
+        },
+        {
+          "agent": "accounting",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_invoice_status": 1,
+            "get_payment_history": 1,
+            "get_cash_position": 1,
+            "get_business_date": 1,
+            "get_vendor_info": 1
+          },
+          "contribution": "Invoice 501 is open and 3 days past due as of the business date 2026-08-31. No payment is recorded; this does not establish whether any payment occurred outside the database. Listed obligations leave $160.00 cash if all are paid. This is information only, not payment approval."
+        },
+        {
+          "agent": "customer_service",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_customer_safe_ticket_context": 1,
+            "check_product_stock": 1
+          },
+          "contribution": "Drafted a customer-ready response using verified stock and list-price facts; no restock or fulfillment option is promised."
+        }
+      ],
+      "delegations": [
+        {
+          "from_agent": "boss",
+          "to_agent": "inventory",
+          "task": "Ticket 101: Verify requested CC-TEE-WHITE size S quantity 1 stock and any relevant restock/fulfillment feasibility. Report factual results and source tools; do not promise or reserve."
+        },
+        {
+          "from_agent": "boss",
+          "to_agent": "accounting",
+          "task": "Ticket 101: Assess linked invoice 501 for CC-TEE-WHITE S rush reprint. Confirm amount/status/due and days overdue using business date; check recorded payment history meaning/uncertainty, cash position, competing obligations (other unpaid invoices and rent due), and vendor lead time if available. Report only tool-verified facts/source tools; no payment authorization."
+        },
+        {
+          "from_agent": "boss",
+          "to_agent": "customer_service",
+          "task": "Ticket 101: Draft a customer-ready response using only approved customer-visible facts: requested Bulldog tee size S, quantity 1, currently 0 in stock; list price $28.00; no restock/fulfillment timing or option has been decided. Do not mention internal financial/vendor details, and do not promise delivery, restock, or substitution."
+        }
+      ],
+      "expected_vs_actual": {
+        "expected_path": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "inventory",
+            "accounting"
+          ]
+        ],
+        "actual_path": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "missing_delegations": [
+          [
+            "inventory",
+            "accounting"
+          ]
+        ],
+        "extra_delegations": [
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "first_specialist_expected": "inventory",
+        "first_specialist_actual": "inventory",
+        "expected_tools": [
+          "check_product_stock",
+          "get_business_date",
+          "get_invoice_status",
+          "get_ticket_context",
+          "get_vendor_info"
+        ],
+        "actual_tools": [
+          "check_product_stock",
+          "get_business_date",
+          "get_cash_position",
+          "get_customer_safe_ticket_context",
+          "get_invoice_status",
+          "get_payment_history",
+          "get_ticket_context",
+          "get_vendor_info"
+        ],
+        "expected_tools_not_used": [],
+        "extra_tools": [
+          "get_cash_position",
+          "get_customer_safe_ticket_context",
+          "get_payment_history"
+        ]
+      },
+      "human_approvals": [],
+      "human_approval_statement": "No human financial or fulfillment approval was granted. Invoice 501 was not paid, and no restock or customer commitment was approved.",
+      "cash_change": {
+        "amount": 0.0,
+        "type": "none",
+        "reason": "No payment, purchase or discount was approved for this ticket."
+      },
+      "screenshot": "evidence/screenshot_ticket101.png"
+    },
+    {
+      "ticket_id": 102,
+      "subject": "Rent due",
+      "type": "rent_notice",
+      "final_status": "resolved",
+      "workflow_resolved": true,
+      "business_state": "paid",
+      "outcome": "Workflow resolved. The lease confirmed $2,400.00 due 2026-09-02. A human then approved one simulated rent payment (payment 1, $2,400.00, billing period 2026-09). Checking went from $3,400.00 to $1,000.00.",
+      "boss_recommendation": {
+        "status": "needs_human_approval",
+        "summary": "The lease confirms September rent of 2400.0 is due 2026-09-02, two days after the business date 2026-08-31; it is not overdue. Accounting reports 3400.00 total cash, an unpaid 840.00 invoice that is 3 days past due, and 160.00 remaining after both listed obligations. No rent payment is recorded, but that does not establish whether payment occurred outside the system. Recommend human review of cash and competing obligations; no payment is authorized or made.",
+        "escalations": [
+          {
+            "category": "payment",
+            "decision_needed": "Whether to authorize payment of the 2400.0 September rent due 2026-09-02."
+          }
+        ]
+      },
+      "outstanding_business_decisions": [
+        "Invoice 501 remains open (a competing obligation noted by Accounting); it was not part of this ticket's approval."
+      ],
+      "run": {
+        "run_id": "832a7ef51ea1",
+        "run_mode": "live",
+        "model": "gpt-6-luna",
+        "status": "finished",
+        "requests": 9,
+        "tool_calls": 10,
+        "input_tokens": 22401,
+        "output_tokens": 2636,
+        "audit_records": 36
+      },
+      "agents": [
+        {
+          "agent": "boss",
+          "delegated_by": null,
+          "delegates_to": [
+            "facilities",
+            "accounting"
+          ],
+          "tools_used": {
+            "get_ticket_context": 1,
+            "get_business_date": 1
+          },
+          "contribution": "The lease confirms September rent of 2400.0 is due 2026-09-02, two days after the business date 2026-08-31; it is not overdue. Accounting reports 3400.00 total cash, an unpaid 840.00 invoice that is 3 days past due, and 160.00 remaining after both listed obligations. No rent payment is recorded, but that does not establish whether payment occurred outside the system. Recommend human review of cash and competing obligations; no payment is authorized or made."
+        },
+        {
+          "agent": "facilities",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_ticket_context": 1,
+            "get_rent_obligation": 1
+          },
+          "contribution": "Ticket 102’s notice says rent is due in 2 days. The lease confirms rent is due 2026-09-02, which is 2 days after the business date 2026-08-31. It is due soon, not overdue. The notice does not state a landlord name or amount, so those claims cannot be compared; the lease lists Elm City Properties and monthly rent of 2400.0."
+        },
+        {
+          "agent": "accounting",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_cash_position": 1,
+            "get_payment_history": 1,
+            "get_business_date": 1,
+            "get_ticket_context": 1
+          },
+          "contribution": "As of the business date 2026-08-31, checking and total cash are $3,400. The September rent of $2,400 is due 2026-09-02 (2 days away); paying rent alone would leave $1,000. The listed unpaid invoice is $840 and 3 days past due. After both listed obligations, $160 would remain. No payments are recorded, which does not establish whether anything was paid outside the system. This is financial information only; rent payment is not authorized."
+        }
+      ],
+      "delegations": [
+        {
+          "from_agent": "boss",
+          "to_agent": "facilities",
+          "task": "Ticket 102 rent notice. Verify landlord, amount, and due date against the lease record; report relevant facts and source tool. No action."
+        },
+        {
+          "from_agent": "boss",
+          "to_agent": "accounting",
+          "task": "Ticket 102 rent due 2026-09-02 per linked lease; human is considering whether rent can be paid. Report current cash position, competing obligations (other unpaid invoices and rent due), and payment-record uncertainty including what payment history says/means. Report facts with source tools; do not authorize or pay."
+        }
+      ],
+      "expected_vs_actual": {
+        "expected_path": [
+          [
+            "boss",
+            "facilities"
+          ],
+          [
+            "facilities",
+            "accounting"
+          ]
+        ],
+        "actual_path": [
+          [
+            "boss",
+            "facilities"
+          ],
+          [
+            "boss",
+            "accounting"
+          ]
+        ],
+        "missing_delegations": [
+          [
+            "facilities",
+            "accounting"
+          ]
+        ],
+        "extra_delegations": [
+          [
+            "boss",
+            "accounting"
+          ]
+        ],
+        "first_specialist_expected": "facilities",
+        "first_specialist_actual": "facilities",
+        "expected_tools": [
+          "get_business_date",
+          "get_cash_position",
+          "get_payment_history",
+          "get_rent_obligation",
+          "get_ticket_context"
+        ],
+        "actual_tools": [
+          "get_business_date",
+          "get_cash_position",
+          "get_payment_history",
+          "get_rent_obligation",
+          "get_ticket_context"
+        ],
+        "expected_tools_not_used": [],
+        "extra_tools": []
+      },
+      "human_approvals": [
+        {
+          "type": "rent payment (simulated local ledger)",
+          "payment_id": 1,
+          "kind": "rent",
+          "ref_id": 1202609,
+          "lease_id": 1,
+          "payee": "Elm City Properties",
+          "billing_period": "2026-09",
+          "amount": 2400.0,
+          "account": "checking",
+          "paid_at": "2026-08-31",
+          "approved_by": "Authorized course operator",
+          "approval_id": "8d79797d4b91",
+          "audit_ids": {
+            "payment_attempt": "7b57f208fd1c",
+            "payment_committed": "0c75ad7679ee"
+          },
+          "note": "Approved by a human after the agent run finished; the agents only recommended."
+        }
+      ],
+      "human_approval_statement": "One human-approved simulated rent payment (payment 1). No other approval was granted.",
+      "cash_change": {
+        "amount": -2400.0,
+        "type": "rent payment",
+        "reason": "Human-approved September 2026 rent payment to Elm City Properties."
+      },
+      "screenshot": "evidence/screenshot_ticket102.png"
+    },
+    {
+      "ticket_id": 103,
+      "subject": "Bulk hoodie discount",
+      "type": "price_override",
+      "final_status": "resolved",
+      "workflow_resolved": true,
+      "business_state": "awaiting_human_decision",
+      "outcome": "Workflow resolved. 8 of 20 size M hoodies are on hand (shortfall 12) at $58.00 list. No discount, purchase, restock or customer commitment was approved. No cash movement.",
+      "boss_recommendation": {
+        "status": "needs_human_approval",
+        "summary": "The customer requested 20 size M hoodies and a bulk discount. Only 8 are in stock, leaving a shortfall of 12. Recommend no discount, stock commitment, or fulfillment/date promise unless a human approves the price and confirms a fulfillment plan. No discount or stock has been approved or committed.",
+        "escalations": [
+          {
+            "category": "discount",
+            "decision_needed": "Whether to approve a bulk discount, and at what price."
+          },
+          {
+            "category": "stock_commitment",
+            "decision_needed": "Whether to commit to fulfilling the additional 12 size M hoodies, including any restock or partial-order plan."
+          }
+        ]
+      },
+      "outstanding_business_decisions": [
+        "8 size M hoodies on hand against 20 requested (shortfall 12).",
+        "List price $58.00. The $22.00 unit cost is a cost fact and NOT an approved discount floor.",
+        "No bulk discount, partial fulfillment, restock or customer commitment was approved. No purchase price exists in the shop's records."
+      ],
+      "run": {
+        "run_id": "88cabc37a99b",
+        "run_mode": "live",
+        "model": "gpt-6-luna",
+        "status": "finished",
+        "requests": 11,
+        "tool_calls": 13,
+        "input_tokens": 29069,
+        "output_tokens": 3558,
+        "audit_records": 47
+      },
+      "agents": [
+        {
+          "agent": "boss",
+          "delegated_by": null,
+          "delegates_to": [
+            "inventory",
+            "accounting",
+            "customer_service"
+          ],
+          "tools_used": {
+            "get_ticket_context": 1,
+            "get_business_date": 1
+          },
+          "contribution": "The customer requested 20 size M hoodies and a bulk discount. Only 8 are in stock, leaving a shortfall of 12. Recommend no discount, stock commitment, or fulfillment/date promise unless a human approves the price and confirms a fulfillment plan. No discount or stock has been approved or committed."
+        },
+        {
+          "agent": "inventory",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "evaluate_bulk_order": 1
+          },
+          "contribution": "The requested quantity cannot be filled from current stock; no stock has been committed."
+        },
+        {
+          "agent": "accounting",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_ticket_context": 1,
+            "evaluate_bulk_order": 1,
+            "get_cash_position": 1,
+            "get_payment_history": 1,
+            "get_invoice_status": 1
+          },
+          "contribution": "Ticket 103 requests 20 CC-HOOD-NAVY hoodies, size M. Verified pricing: list price $58.00, unit cost $22.00, and margin at list $36.00 per unit; the 20-unit order totals $1,160.00 at list and $440.00 cost. Cash is $3,400.00 against an $840.00 overdue invoice and $2,400.00 rent due in two days, leaving $160.00 after all listed obligations. No payment is recorded; payment matching semantics are unverified. No payment or discount is approved."
+        },
+        {
+          "agent": "customer_service",
+          "delegated_by": "boss",
+          "delegates_to": [],
+          "tools_used": {
+            "get_customer_safe_ticket_context": 1,
+            "check_product_stock": 1
+          },
+          "contribution": "Drafted a customer-safe reply with confirmed size M stock and list price; discount and fulfillment remain undecided."
+        }
+      ],
+      "delegations": [
+        {
+          "from_agent": "boss",
+          "to_agent": "inventory",
+          "task": "Ticket 103: Verify current stock and shortfall for SKU CC-HOOD-NAVY, size M, qty 20 requested. Report tool-sourced facts and whether available stock can satisfy it; do not commit stock."
+        },
+        {
+          "from_agent": "boss",
+          "to_agent": "accounting",
+          "task": "Ticket 103: Verify list price, unit cost and margin facts for the requested bulk hoodie. Also report cash position, competing obligations (other unpaid invoices and rent due), and payment-record uncertainty (whether payment history is empty or its meaning unverified). No approval/payment."
+        },
+        {
+          "from_agent": "boss",
+          "to_agent": "customer_service",
+          "task": "Ticket 103: Draft a brief customer-ready reply. Customer requested 20 size M hoodies. Verified customer-shareable facts: 8 size M are currently in stock; list price is $58.00 each. The remaining quantity, any discount, and any restock/fulfillment plan have not been decided. Do not promise stock, discount, or delivery date. Do not include internal costs, margins, cash, invoices, or vendors."
+        }
+      ],
+      "expected_vs_actual": {
+        "expected_path": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "inventory",
+            "customer_service"
+          ]
+        ],
+        "actual_path": [
+          [
+            "boss",
+            "inventory"
+          ],
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "missing_delegations": [
+          [
+            "inventory",
+            "customer_service"
+          ]
+        ],
+        "extra_delegations": [
+          [
+            "boss",
+            "accounting"
+          ],
+          [
+            "boss",
+            "customer_service"
+          ]
+        ],
+        "first_specialist_expected": "inventory",
+        "first_specialist_actual": "inventory",
+        "expected_tools": [
+          "evaluate_bulk_order",
+          "get_business_date",
+          "get_customer_safe_ticket_context",
+          "get_ticket_context"
+        ],
+        "actual_tools": [
+          "check_product_stock",
+          "evaluate_bulk_order",
+          "get_business_date",
+          "get_cash_position",
+          "get_customer_safe_ticket_context",
+          "get_invoice_status",
+          "get_payment_history",
+          "get_ticket_context"
+        ],
+        "expected_tools_not_used": [],
+        "extra_tools": [
+          "check_product_stock",
+          "get_cash_position",
+          "get_invoice_status",
+          "get_payment_history"
+        ]
+      },
+      "human_approvals": [],
+      "human_approval_statement": "No human financial or fulfillment approval was granted: no discount, purchase, restock, partial fulfillment or customer commitment.",
+      "cash_change": {
+        "amount": 0.0,
+        "type": "none",
+        "reason": "No payment, purchase or discount was approved for this ticket."
+      },
+      "screenshot": "evidence/screenshot_ticket103.png"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "problem": 4,
+  "mcp_server": "campus-customs",
+  "connection_status": "connected - all three tools were invoked as live MCP tool calls in this Claude Code session; each returned a result without error",
+  "database_checked": "data/campus_customs_new.db (opened read-only/immutable)",
+  "database_integrity": {
+    "sha256_before": {
+      "campus_customs.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a",
+      "campus_customs_new.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a"
+    },
+    "sha256_after": {
+      "campus_customs.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a",
+      "campus_customs_new.db": "23686a90d698f7fa6f901a3f0a9774db9cbb31e13151c9e5717275f3321f360a"
+    },
+    "unchanged": true
+  },
+  "tests": [
+    {
+      "prompt": "Check stock and listed price for one Bulldog tee in size S using check_product_stock.",
+      "tool_name": "mcp__campus-customs__check_product_stock",
+      "arguments": {
+        "product": "Bulldog Tee",
+        "size": "S",
+        "quantity": 1
+      },
+      "returned_output": {
+        "query": {
+          "product": "Bulldog Tee",
+          "size": "S",
+          "quantity": 1
+        },
+        "business_date": "2026-08-31",
+        "found": true,
+        "products": [
+          {
+            "sku": "CC-TEE-WHITE",
+            "name": "Classic Bulldog Tee",
+            "list_price": 28,
+            "price_recorded": true,
+            "sizes": [
+              {
+                "size": "L",
+                "qty_on_hand": 3,
+                "location": "Aisle B"
+              },
+              {
+                "size": "M",
+                "qty_on_hand": 5,
+                "location": "Aisle B"
+              },
+              {
+                "size": "S",
+                "qty_on_hand": 0,
+                "location": "Aisle B"
+              },
+              {
+                "size": "XL",
+                "qty_on_hand": 2,
+                "location": "Aisle B"
+              }
+            ],
+            "requested_size": {
+              "size": "S",
+              "recorded": true,
+              "qty_on_hand": 0,
+              "quantity_requested": 1,
+              "available": false,
+              "shortfall": 1
+            }
+          }
+        ]
+      },
+      "expected": {
+        "available": 0,
+        "list_price": 28
+      },
+      "database_values": {
+        "qty_on_hand": 0,
+        "list_price": 28.0
+      },
+      "matches_database": true,
+      "matches_expected": true,
+      "test": "test_1_check_product_stock",
+      "tool_actually_called_via_mcp": true,
+      "status": "PASSED"
+    },
+    {
+      "prompt": "Retrieve the store's rent obligation, including landlord, amount, and due date, using get_rent_obligation.",
+      "tool_name": "mcp__campus-customs__get_rent_obligation",
+      "arguments": {},
+      "returned_output": {
+        "query": {
+          "lease_id": null,
+          "landlord": null,
+          "claimed_amount": null,
+          "claimed_due_date": null
+        },
+        "business_date": "2026-08-31",
+        "found": true,
+        "leases": [
+          {
+            "lease_id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "monthly_rent": 2400,
+            "next_due": "2026-09-02",
+            "days_until_due": 2,
+            "overdue": false,
+            "notes": null
+          }
+        ],
+        "note": "Read-only lookup. No payment has been made or scheduled."
+      },
+      "expected": {
+        "landlord": "Elm City Properties",
+        "amount": 2400,
+        "due_date": "2026-09-02"
+      },
+      "database_values": [
+        {
+          "landlord": "Elm City Properties",
+          "monthly_rent": 2400.0,
+          "next_due": "2026-09-02"
+        }
+      ],
+      "matches_database": true,
+      "matches_expected": true,
+      "test": "test_2_get_rent_obligation",
+      "tool_actually_called_via_mcp": true,
+      "status": "PASSED"
+    },
+    {
+      "prompt": "Evaluate inventory and pricing for an order of 20 navy hoodies in size M using evaluate_bulk_order.",
+      "tool_name": "mcp__campus-customs__evaluate_bulk_order",
+      "arguments": {
+        "sku": "CC-HOOD-NAVY",
+        "size": "M",
+        "quantity": 20
+      },
+      "returned_output": {
+        "query": {
+          "sku": "CC-HOOD-NAVY",
+          "size": "M",
+          "quantity": 20
+        },
+        "business_date": "2026-08-31",
+        "found": true,
+        "sku": "CC-HOOD-NAVY",
+        "name": "Basic Hoodie Big Yale",
+        "stock_by_size": [
+          {
+            "size": "L",
+            "qty_on_hand": 14
+          },
+          {
+            "size": "M",
+            "qty_on_hand": 8
+          },
+          {
+            "size": "S",
+            "qty_on_hand": 4
+          },
+          {
+            "size": "XL",
+            "qty_on_hand": 6
+          }
+        ],
+        "requested_size_recorded": true,
+        "location": "Aisle A",
+        "qty_on_hand": 8,
+        "shortfall": 12,
+        "can_fill_from_stock": false,
+        "pricing_recorded": true,
+        "list_price": 58,
+        "unit_cost": 22,
+        "order_value_at_list": 1160,
+        "order_cost": 440,
+        "margin_per_unit_at_list": 36,
+        "max_discount_before_loss_pct": 62.1,
+        "note": "Information only. No discount has been approved and no inventory has been reserved. A price override needs human approval."
+      },
+      "expected": {
+        "requested": 20,
+        "available": 8,
+        "shortage": 12,
+        "list_price": 58,
+        "unit_cost": 22
+      },
+      "database_values": {
+        "qty_on_hand": 8,
+        "list_price": 58.0,
+        "unit_cost": 22.0,
+        "shortfall_computed": 12
+      },
+      "matches_database": true,
+      "matches_expected": true,
+      "test": "test_3_evaluate_bulk_order",
+      "tool_actually_called_via_mcp": true,
+      "status": "PASSED"
+    }
+  ],
+  "all_passed": true
+}
